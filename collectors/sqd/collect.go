@@ -15,7 +15,7 @@ func (s *SQD) Collect() map[string]int64 {
 	metrics := make(map[string]int64)
 	
 	for _, worker := range s.Workers {
-		workerID := s.safeID(fmt.Sprintf("%s_%d", worker.Name, worker.Port))
+		workerID := s.safeID(worker.Name)
 		
 		// Get Prometheus metrics
 		promMetrics, err := s.getPrometheusMetrics(worker.PrometheusURL, workerID)

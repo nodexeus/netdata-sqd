@@ -37,7 +37,7 @@ const (
 func (s *SQD) initCharts() {
 	// Create charts for each worker
 	for _, worker := range s.Workers {
-		workerID := sanitizeID(fmt.Sprintf("%s_%d", worker.Name, worker.Port))
+		workerID := sanitizeID(worker.Name)
 		
 		// Worker status chart
 		statusChart := &Chart{

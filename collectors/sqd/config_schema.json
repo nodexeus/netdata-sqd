@@ -36,17 +36,9 @@
             "type": "string",
             "format": "uri",
             "default": "https://subsquid.squids.live/subsquid-network-mainnet/graphql"
-          },
-          "port": {
-            "title": "Port",
-            "description": "Port number of the worker.",
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 65535,
-            "default": 9090
           }
         },
-        "required": ["prometheus_url", "graphql_url", "port"]
+        "required": ["prometheus_url", "graphql_url"]
       }
     }
   },

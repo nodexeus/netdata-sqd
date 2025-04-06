@@ -44,7 +44,6 @@ func main() {
 				Name:          "default",
 				PrometheusURL: "http://localhost:9090",
 				GraphQLURL:    "https://subsquid.squids.live/subsquid-network-mainnet/graphql",
-				Port:          9090,
 			},
 		},
 	}

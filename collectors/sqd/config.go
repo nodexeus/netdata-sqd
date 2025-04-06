@@ -16,7 +16,6 @@ type WorkerConfig struct {
 	Name          string `yaml:"name" json:"name"`
 	PrometheusURL string `yaml:"prometheus_url" json:"prometheus_url"`
 	GraphQLURL    string `yaml:"graphql_url" json:"graphql_url"`
-	Port          int    `yaml:"port" json:"port"`
 }
 
 // Validate validates the collector configuration
@@ -34,9 +33,6 @@ func (c Config) Validate() error {
 		}
 		if worker.GraphQLURL == "" {
 			return fmt.Errorf("worker[%d]: graphql_url cannot be empty", i)
-		}
-		if worker.Port <= 0 {
-			return fmt.Errorf("worker[%d]: port must be positive", i)
 		}
 	}
 
@@ -56,7 +52,6 @@ func (c *Config) Init() {
 				Name:          "default",
 				PrometheusURL: "http://localhost:9090",
 				GraphQLURL:    "https://subsquid.squids.live/subsquid-network-mainnet/graphql",
-				Port:          9090,
 			},
 		}
 	}
