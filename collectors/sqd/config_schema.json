@@ -8,7 +8,7 @@
       "description": "Data collection interval in seconds.",
       "type": "integer",
       "minimum": 1,
-      "default": 1
+      "default": 60
     },
     "workers": {
       "title": "SQD Workers",

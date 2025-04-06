@@ -56,16 +56,14 @@ sudo ./edit-config go.d/sqd.conf
 Here's a sample configuration:
 
 ```yaml
-update_every: 1
+update_every: 60
 workers:
   - name: worker1
     prometheus_url: http://localhost:9090
     graphql_url: https://subsquid.squids.live/subsquid-network-mainnet/graphql
-    port: 9090
   - name: worker2
     prometheus_url: http://remote-server:9090
     graphql_url: https://subsquid.squids.live/subsquid-network-mainnet/graphql
-    port: 9090
 ```
 
 You can add any number of workers by adding more entries to the `workers` array.
@@ -76,11 +74,10 @@ The following options can be defined globally or per worker:
 
 | Option | Description | Default Value |
 |--------|-------------|---------------|
-| update_every | Data collection interval in seconds | 1 |
+| update_every | Data collection interval in seconds | 60 |
 | name | A unique name for the worker | worker |
 | prometheus_url | URL of the Prometheus metrics endpoint | http://localhost:9090 |
 | graphql_url | URL of the GraphQL API endpoint | https://subsquid.squids.live/subsquid-network-mainnet/graphql |
-| port | Port number of the worker | 9090 |
 
 ## Troubleshooting
 

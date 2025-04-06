@@ -86,7 +86,7 @@ if [ $? -eq 0 ]; then
         echo "Creating default configuration..."
         cat > build/sqd.conf << EOF
 # SQD collector configuration
-update_every: 1
+update_every: 60
 
 workers:
   - name: default

@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	defaultUpdateEvery = 1
+	defaultUpdateEvery = 60
 )
 
 // New creates a new SQD collector

@@ -42,7 +42,7 @@ func (c Config) Validate() error {
 // Init initializes the config with default values
 func (c *Config) Init() {
 	if c.UpdateEvery <= 0 {
-		c.UpdateEvery = 1
+		c.UpdateEvery = 60
 	}
 
 	// Provide default worker if none configured
