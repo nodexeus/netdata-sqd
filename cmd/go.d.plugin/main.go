@@ -109,7 +109,16 @@ func main() {
 
 				// Print the actual data
 				fmt.Printf("BEGIN sqd.%s\n", key)
-				fmt.Printf("SET value = %f\n", value)
+				
+				// Use appropriate precision for different types of metrics
+				if strings.Contains(key, "apr") || strings.Contains(key, "uptime") || strings.Contains(key, "traffic_weight") {
+					// Use more precision for percentage values
+					fmt.Printf("SET value = %.6f\n", value)
+				} else {
+					// Use regular precision for other values
+					fmt.Printf("SET value = %f\n", value)
+				}
+				
 				fmt.Printf("END\n")
 			}
 

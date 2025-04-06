@@ -9,29 +9,29 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/prometheus/common/expfmt"
 	dto "github.com/prometheus/client_model/go"
+	"github.com/prometheus/common/expfmt"
 )
 
 // Collect gathers metrics from SQD workers
 func (s *SQD) Collect() map[string]float64 {
 	metrics := make(map[string]float64)
-	
+
 	for _, worker := range s.Workers {
 		originalWorkerID := s.safeID(worker.Name)
-		
+
 		// Get Prometheus metrics
 		promMetrics, err := s.getPrometheusMetrics(worker.PrometheusURL, originalWorkerID)
 		if err != nil {
 			fmt.Printf("error collecting Prometheus metrics from %s: %v\n", worker.PrometheusURL, err)
 		} else {
 			s.prometheusMetrics[originalWorkerID] = promMetrics
-			
+
 			// Use the actual worker ID returned from Prometheus for GraphQL queries
 			actualWorkerID := promMetrics.WorkerID
 			if actualWorkerID != "" {
 				fmt.Printf("Using actual worker ID for GraphQL: %s\n", actualWorkerID)
-				
+
 				// Get GraphQL metrics using the actual worker ID
 				gqlMetrics, err := s.getGraphQLMetrics(worker.GraphQLURL, actualWorkerID)
 				if err != nil {
@@ -42,7 +42,7 @@ func (s *SQD) Collect() map[string]float64 {
 			} else {
 				// If no actual worker ID was found, fall back to the original ID
 				fmt.Printf("Warning: No actual worker ID found, using configured name for GraphQL\n")
-				
+
 				// Get GraphQL metrics using the original worker ID
 				gqlMetrics, err := s.getGraphQLMetrics(worker.GraphQLURL, originalWorkerID)
 				if err != nil {
@@ -52,7 +52,7 @@ func (s *SQD) Collect() map[string]float64 {
 				}
 			}
 		}
-		
+
 		var gqlMetrics *GraphQLMetrics
 		// Map metrics to netdata format
 		if promMetrics != nil {
@@ -69,11 +69,11 @@ func (s *SQD) Collect() map[string]float64 {
 			metrics[fmt.Sprintf("worker_%s_chunks_removed", originalWorkerID)] = float64(promMetrics.ChunksRemoved)
 			metrics[fmt.Sprintf("worker_%s_storage_bytes", originalWorkerID)] = float64(promMetrics.UsedStorageBytes)
 			metrics[fmt.Sprintf("worker_%s_running_queries", originalWorkerID)] = float64(promMetrics.RunningQueries)
-			
+
 			// Get the GraphQL metrics from the map if available
 			gqlMetrics = s.graphqlMetrics[originalWorkerID]
 		}
-		
+
 		if gqlMetrics != nil {
 			metrics[fmt.Sprintf("worker_%s_online", originalWorkerID)] = float64(boolToInt64(gqlMetrics.Online))
 			metrics[fmt.Sprintf("worker_%s_jailed", originalWorkerID)] = float64(boolToInt64(gqlMetrics.Jailed))
@@ -85,7 +85,7 @@ func (s *SQD) Collect() map[string]float64 {
 			metrics[fmt.Sprintf("worker_%s_delegation_count", originalWorkerID)] = float64(gqlMetrics.DelegationCount)
 		}
 	}
-	
+
 	return metrics
 }
 
@@ -117,14 +117,14 @@ func (s *SQD) getPrometheusMetrics(url, workerID string) (*PrometheusMetrics, er
 		// If standard parsing fails, try a more lenient approach - read line by line and skip problematic lines
 		fmt.Printf("Warning: Standard Prometheus parsing failed, falling back to simplified parsing: %v\n", err)
 		metricFamilies = make(map[string]*dto.MetricFamily)
-		
+
 		// Simple parsing just to get the values we need
 		lines := strings.Split(string(bodyBytes), "\n")
 		for _, line := range lines {
 			if strings.HasPrefix(line, "#") || strings.TrimSpace(line) == "" {
 				continue // Skip comments and empty lines
 			}
-			
+
 			// Very simple parsing just to extract values we need
 			parts := strings.Fields(line)
 			if len(parts) >= 2 {
@@ -333,7 +333,7 @@ func (s *SQD) getPeerIDFromPrometheus(url string) (string, error) {
 				workerIDStart += 11 // Length of 'worker_id="'
 				workerIDEnd := strings.Index(line[workerIDStart:], "\"")
 				if workerIDEnd != -1 {
-					workerID := line[workerIDStart:workerIDStart+workerIDEnd]
+					workerID := line[workerIDStart : workerIDStart+workerIDEnd]
 					fmt.Printf("Found worker ID: %s\n", workerID)
 					return workerID, nil
 				}

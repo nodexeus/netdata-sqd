@@ -1,15 +1,71 @@
 # Netdata SQD Collector
 
-This is a Netdata collector plugin written in Go that monitors SQD worker nodes. It collects various metrics from both Prometheus and GraphQL endpoints and follows the official netdata collector architecture for optimal integration.
+This is a Netdata collector plugin written in Go that monitors SQD worker nodes. It collects various metrics from both Prometheus and GraphQL endpoints and follows the Netdata external plugin format for data collection.
 
 ## Features
 
-- Implements the standard netdata collector architecture
+- Implements the Netdata external plugin format
 - Monitors multiple SQD worker nodes
 - Collects comprehensive metrics from Prometheus endpoints
 - Collects additional metrics from GraphQL endpoints
 - Configurable update interval and worker endpoints
-- Official netdata collector file structure
+- Proper CHART and DIMENSION declarations for Netdata integration
+
+## Installation
+
+### Building from Source
+
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/yourusername/netdata-sqd.git
+   cd netdata-sqd
+   ```
+
+2. Build the plugin:
+   ```bash
+   ./build.sh
+   ```
+
+3. Install the plugin to Netdata plugins directory:
+   ```bash
+   sudo cp build/sqd.plugin /usr/libexec/netdata/plugins.d/
+   sudo chown netdata:netdata /usr/libexec/netdata/plugins.d/sqd.plugin
+   sudo chmod 0755 /usr/libexec/netdata/plugins.d/sqd.plugin
+   ```
+
+4. Create a configuration file:
+   ```bash
+   sudo mkdir -p /etc/netdata
+   sudo cp config/sqd.conf.example /etc/netdata/sqd.conf
+   sudo chown netdata:netdata /etc/netdata/sqd.conf
+   ```
+
+5. Edit the configuration file to match your SQD worker nodes:
+   ```bash
+   sudo vim /etc/netdata/sqd.conf
+   ```
+
+6. Restart Netdata to load the plugin:
+   ```bash
+   sudo systemctl restart netdata
+   ```
+
+## Configuration
+
+Edit the `/etc/netdata/sqd.conf` file to configure your SQD worker nodes:
+
+```json
+{
+  "update_every": 60,
+  "workers": [
+    {
+      "name": "my-worker",
+      "prometheus_url": "http://sqd-worker:9090/metrics",
+      "graphql_url": "https://subsquid.squids.live/subsquid-network-mainnet/graphql"
+    }
+  ]
+}
+```
 
 ## Directory Structure
 
