@@ -1,111 +1,137 @@
-# Netdata SQD Plugin
+# Netdata SQD Collector
 
-This is a Netdata plugin written in Go that monitors SQD worker nodes. It collects various metrics from both Prometheus and GraphQL endpoints and follows the netdata Module interface pattern for optimal integration.
+This is a Netdata collector plugin written in Go that monitors SQD worker nodes. It collects various metrics from both Prometheus and GraphQL endpoints and follows the official netdata collector architecture for optimal integration.
 
 ## Features
 
-- Implements the standard netdata Module interface pattern
+- Implements the standard netdata collector architecture
 - Monitors multiple SQD worker nodes
 - Collects comprehensive metrics from Prometheus endpoints
 - Collects additional metrics from GraphQL endpoints
 - Configurable update interval and worker endpoints
-- Modular and maintainable code structure
+- Official netdata collector file structure
 
-## Architecture
+## Directory Structure
 
-The plugin follows the netdata Module interface pattern with the following components:
-
-- **Main Program**: Initializes the collector, sets up chart definitions, and handles the collection loop
-- **SQD Module**: Implements the Module interface with Init(), Check(), Charts(), and Collect() methods
-- **Charts**: Defines chart structures with dimensions for visualization in netdata
-
-## Installation
-
-1. Build the plugin:
-```bash
-go build -o sqd_plugin
+```
+netdata-sqd/
+├── build.sh                 # Build and installation script
+├── collectors/
+│   └── sqd/                 # SQD collector module
+│       ├── charts.go        # Chart definitions
+│       ├── collect.go       # Data collection logic
+│       ├── config.go        # Configuration structure and validation
+│       ├── config_schema.json # JSON schema for configuration
+│       ├── init.go          # Module registration
+│       ├── metadata.yaml    # Dashboard and metrics metadata
+│       ├── README.md        # Module documentation
+│       └── sqd.go           # Core collector implementation
+├── cmd/
+│   └── go.d.plugin/         # Main plugin entry point
+│       └── main.go
+└── go.mod                   # Dependencies
 ```
 
-2. Make the plugin executable:
+## Building and Installation
+
+The project includes a build script that simplifies building and installation:
+
 ```bash
-chmod +x sqd_plugin
+# Just build the collector
+./build.sh
+
+# Build with debug symbols
+./build.sh --debug
+
+# Build and install to netdata
+./build.sh --install
 ```
 
-3. Move the plugin to Netdata's plugins directory:
-```bash
-sudo cp sqd_plugin /usr/libexec/netdata/plugins.d/
-```
+The build script will:
+1. Build the collector with optimized settings (or debug symbols if requested)
+2. Optionally install the collector to the netdata plugins directory
+3. Create a default configuration file in the netdata config directory
+
+### Integration with netdata
+
+This collector follows the structure of the official netdata Go collectors but is designed to be used as a standalone plugin initially. Full integration with the netdata go.d.plugin system requires additional setup:
+
+1. Clone the netdata go.d.plugin repository
+2. Copy the sqd collector files to the appropriate directories in the go.d.plugin codebase
+3. Register the module in the go.d.plugin module registry
+4. Build the go.d.plugin with the SQD collector included
+
+Refer to the [netdata go.d.plugin documentation](https://github.com/netdata/go.d.plugin) for details on integrating custom collectors.
 
 ## Configuration
 
-The plugin can be configured through a JSON configuration file:
+The collector is configured through a YAML configuration file located at `/etc/netdata/go.d/sqd.conf`.
 
-### JSON Configuration
-Create a `sqd.conf` file in one of these locations:
-- `./sqd.conf` (current directory)
-- `/etc/netdata/sqd.conf`
-- `$HOME/.config/netdata/sqd.conf`
+### Configuration Format
 
-Configuration structure:
-```json
-{
-  "update_every": 1,
-  "workers": [
-    {
-      "name": "default",
-      "prometheus_url": "http://localhost:9090",
-      "graphql_url": "http://localhost:8080",
-      "port": 9090
-    }
-  ]
-}
+```yaml
+# SQD collector configuration
+update_every: 1
+
+workers:
+  - name: default
+    prometheus_url: http://localhost:9090
+    graphql_url: http://localhost:8080
+    port: 9090
+  
+  - name: worker2
+    prometheus_url: http://remote-server:9090
+    graphql_url: http://remote-server:8080
+    port: 9090
 ```
 
-Parameters:
-- `update_every`: Update interval in seconds (default: 1)
-- `workers`: Array of worker configurations
-  - `name`: Friendly name for the worker (used in chart identifiers)
-  - `prometheus_url`: URL to the Prometheus metrics endpoint
-  - `graphql_url`: URL to the GraphQL API endpoint
-  - `port`: Port number of the worker
+### Configuration Options
+
+| Option | Description | Default Value |
+|--------|-------------|---------------|
+| update_every | Data collection interval in seconds | 1 |
+| name | A unique name for the worker | worker |
+| prometheus_url | URL of the Prometheus metrics endpoint | http://localhost:9090 |
+| graphql_url | URL of the GraphQL API endpoint | http://localhost:8080 |
+| port | Port number of the worker | 9090 |
 
 ## Metrics
 
-The plugin collects the following metrics for each worker:
+The collector gathers the following metrics for each configured worker:
 
-### Worker Status Charts
-- Online status
-- Jailed status
+### Worker Status
+- Worker online status
+- Worker jailed status
 
-### Connections Chart
-- Active connections
+### Worker Connections
+- Active connections count
 
-### Queries Chart
+### Worker Queries
 - Ongoing queries
 - Running queries
 
-### Storage Chart
+### Worker Storage
 - Used storage bytes
 
-### Chunks Chart
+### Worker Chunks
 - Available chunks
 - Downloading chunks
 - Pending chunks
 
-### Performance Chart
-- Uptime 24 hours (percentage)
-- Uptime 90 days (percentage)
+### Worker Performance
+- Uptime over 24 hours (percentage)
+- Uptime over 90 days (percentage)
 
-### Rewards Chart
-- APR (percentage)
-- Staker APR (percentage)
+### Worker Rewards
+- APR (Annual Percentage Rate)
+- Staker APR
 
-### Delegation Chart
+### Worker Delegation
 - Delegation count
 
 ## Requirements
 
-- Go 1.16 or later
+- Go 1.18 or later
 - Netdata
 - SQD worker nodes with:
   - Prometheus metrics endpoint
@@ -114,17 +140,30 @@ The plugin collects the following metrics for each worker:
 
 ## Development
 
-The codebase is organized as follows:
+The collector follows the official netdata collector architecture:
 
-- `main.go`: Entry point that loads configuration and sets up the collector loop
-- `module/sqd.go`: Core implementation of the SQD collector module
-- `module/charts.go`: Chart definitions and helper functions
+- **Module Registration**: Each collector registers itself in `init.go`
+- **Configuration**: Configuration is defined and validated in `config.go`
+- **Charts**: Chart definitions are in `charts.go`
+- **Data Collection**: The collection logic is in `collect.go`
 
-To extend the plugin:
-1. Add new metrics to the `PrometheusMetrics` or `GraphQLMetrics` structs
-2. Add metric collection logic in `getPrometheusMetrics()` or `getGraphQLMetrics()`
-3. Update the `initCharts()` method to define new charts
-4. Map the metrics to chart dimensions in the `Collect()` method
+To extend the collector:
+1. Add new metrics to the appropriate structs in `sqd.go`
+2. Add metric collection logic in `collect.go`
+3. Update the chart definitions in `charts.go`
+4. Update `metadata.yaml` with information about the new metrics
+
+## Troubleshooting
+
+If you encounter issues with the collector, you can enable debug mode by editing the `go.d.conf` file:
+
+```yaml
+modules:
+  sqd: yes
+  debug: yes
+```
+
+This will provide more detailed logs about the collector's operation.
 
 ## License
 

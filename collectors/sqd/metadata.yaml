@@ -1,0 +1,77 @@
+name: SQD
+title: SQD Monitoring
+overview:
+  application:
+    description: |-
+      Monitors SQD worker nodes by collecting metrics from Prometheus and GraphQL endpoints.
+    categories:
+      - data-collection
+      - blockchain
+    keywords:
+      - sqd
+      - worker
+      - prometheus
+      - graphql
+  collector:
+    description: |-
+      Collects various metrics from SQD worker nodes using their Prometheus metrics
+      and GraphQL API endpoints. Provides insights into worker status, connection counts,
+      query performance, storage usage, and rewards.
+icon:
+  filename: 'sqd.png'
+
+availability: sqd
+
+metrics:
+  folding:
+    title: SQD Workers Metrics
+    metrics:
+      dimensions:
+        title: Dimensions
+  metrics:
+      - name: sqd.worker_status
+        description: Worker Status
+        unit: status
+        dimensions:
+          - name: online
+          - name: jailed
+      - name: sqd.worker_connections
+        description: Worker Connections
+        unit: connections
+        dimensions:
+          - name: active
+      - name: sqd.worker_queries
+        description: Worker Queries
+        unit: queries
+        dimensions:
+          - name: ongoing
+          - name: running
+      - name: sqd.worker_storage
+        description: Worker Storage
+        unit: bytes
+        dimensions:
+          - name: used
+      - name: sqd.worker_chunks
+        description: Worker Chunks
+        unit: chunks
+        dimensions:
+          - name: available
+          - name: downloading
+          - name: pending
+      - name: sqd.worker_performance
+        description: Worker Performance
+        unit: percentage
+        dimensions:
+          - name: uptime_24h
+          - name: uptime_90d
+      - name: sqd.worker_rewards
+        description: Worker Rewards
+        unit: percentage
+        dimensions:
+          - name: apr
+          - name: staker_apr
+      - name: sqd.worker_delegation
+        description: Worker Delegation
+        unit: count
+        dimensions:
+          - name: count

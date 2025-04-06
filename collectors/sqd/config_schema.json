@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SQD collector configuration",
+  "type": "object",
+  "properties": {
+    "update_every": {
+      "title": "Update every",
+      "description": "Data collection interval in seconds.",
+      "type": "integer",
+      "minimum": 1,
+      "default": 1
+    },
+    "workers": {
+      "title": "SQD Workers",
+      "description": "List of SQD workers to monitor",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "title": "Worker name",
+            "description": "A unique name for the worker.",
+            "type": "string",
+            "default": "worker"
+          },
+          "prometheus_url": {
+            "title": "Prometheus URL",
+            "description": "URL of the Prometheus metrics endpoint.",
+            "type": "string",
+            "format": "uri",
+            "default": "http://localhost:9090"
+          },
+          "graphql_url": {
+            "title": "GraphQL URL",
+            "description": "URL of the GraphQL API endpoint.",
+            "type": "string",
+            "format": "uri",
+            "default": "http://localhost:8080"
+          },
+          "port": {
+            "title": "Port",
+            "description": "Port number of the worker.",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535,
+            "default": 9090
+          }
+        },
+        "required": ["prometheus_url", "graphql_url", "port"]
+      }
+    }
+  },
+  "required": ["workers"]
+}
