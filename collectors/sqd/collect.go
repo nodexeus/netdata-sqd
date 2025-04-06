@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/prometheus/common/expfmt"
+	dto "github.com/prometheus/client_model/go"
 )
 
 // Collect gathers metrics from SQD workers
@@ -67,16 +70,60 @@ func (s *SQD) Collect() map[string]int64 {
 
 // getPrometheusMetrics fetches metrics from Prometheus
 func (s *SQD) getPrometheusMetrics(url, workerID string) (*PrometheusMetrics, error) {
+	// First, try to get the actual worker ID from the node
+	actualPeerID, err := s.getPeerIDFromPrometheus(url)
+	if err == nil && actualPeerID != "" {
+		// If we found a valid peer ID, use it instead of the configured name
+		workerID = actualPeerID
+	}
+
 	resp, err := http.Get(url + "/metrics")
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	var parser expfmt.TextParser
-	metricFamilies, err := parser.TextToMetricFamilies(resp.Body)
+	// We need to read the body first to handle parsing errors manually
+	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
+	}
+
+	// Try parsing with the standard parser
+	var parser expfmt.TextParser
+	metricFamilies, err := parser.TextToMetricFamilies(bytes.NewReader(bodyBytes))
+	if err != nil {
+		// If standard parsing fails, try a more lenient approach - read line by line and skip problematic lines
+		fmt.Printf("Warning: Standard Prometheus parsing failed, falling back to simplified parsing: %v\n", err)
+		metricFamilies = make(map[string]*dto.MetricFamily)
+		
+		// Simple parsing just to get the values we need
+		lines := strings.Split(string(bodyBytes), "\n")
+		for _, line := range lines {
+			if strings.HasPrefix(line, "#") || strings.TrimSpace(line) == "" {
+				continue // Skip comments and empty lines
+			}
+			
+			// Very simple parsing just to extract values we need
+			parts := strings.Fields(line)
+			if len(parts) >= 2 {
+				metricName := parts[0]
+				metricValueStr := parts[len(parts)-1]
+				metricValue, parseErr := strconv.ParseFloat(metricValueStr, 64)
+				if parseErr == nil {
+					// Store simple metrics - this is just a fallback
+					if metricFamilies[metricName] == nil {
+						metricFamilies[metricName] = &dto.MetricFamily{
+							Name: &metricName,
+							Type: dto.MetricType_GAUGE.Enum(),
+							Metric: []*dto.Metric{{
+								Gauge: &dto.Gauge{Value: &metricValue},
+							}},
+						}
+					}
+				}
+			}
+		}
 	}
 
 	metrics := &PrometheusMetrics{
@@ -237,4 +284,41 @@ func boolToInt64(b bool) int64 {
 		return 1
 	}
 	return 0
+}
+
+// getPeerIDFromPrometheus attempts to extract the actual worker ID from the Prometheus metrics
+// This is important because the GraphQL API needs the actual worker ID, not just the node name
+func (s *SQD) getPeerIDFromPrometheus(url string) (string, error) {
+	resp, err := http.Get(url + "/metrics")
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	// Read the response body
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	// Look for the 'worker_info_info' metric which includes the worker ID
+	lines := strings.Split(string(bodyBytes), "\n")
+	for _, line := range lines {
+		// Check for the worker info metric with worker_id label
+		if strings.Contains(line, "worker_info_info") && strings.Contains(line, "worker_id=\"") {
+			// Extract the worker ID from the line
+			workerIDStart := strings.Index(line, "worker_id=\"")
+			if workerIDStart != -1 {
+				workerIDStart += 11 // Length of 'worker_id="'
+				workerIDEnd := strings.Index(line[workerIDStart:], "\"")
+				if workerIDEnd != -1 {
+					workerID := line[workerIDStart:workerIDStart+workerIDEnd]
+					fmt.Printf("Found worker ID: %s\n", workerID)
+					return workerID, nil
+				}
+			}
+		}
+	}
+
+	return "", fmt.Errorf("worker ID not found in metrics")
 }

@@ -71,17 +71,17 @@ The collector is configured through a YAML configuration file located at `/etc/n
 
 ```yaml
 # SQD collector configuration
-update_every: 1
+update_every: 60
 
 workers:
   - name: default
     prometheus_url: http://localhost:9090
-    graphql_url: http://localhost:8080
+    graphql_url: https://subsquid.squids.live/subsquid-network-mainnet/graphql
     port: 9090
   
   - name: worker2
     prometheus_url: http://remote-server:9090
-    graphql_url: http://remote-server:8080
+    graphql_url: https://subsquid.squids.live/subsquid-network-mainnet/graphql
     port: 9090
 ```
 
@@ -89,10 +89,10 @@ workers:
 
 | Option | Description | Default Value |
 |--------|-------------|---------------|
-| update_every | Data collection interval in seconds | 1 |
+| update_every | Data collection interval in seconds | 60 |
 | name | A unique name for the worker | worker |
 | prometheus_url | URL of the Prometheus metrics endpoint | http://localhost:9090 |
-| graphql_url | URL of the GraphQL API endpoint | http://localhost:8080 |
+| graphql_url | URL of the GraphQL API endpoint | https://subsquid.squids.live/subsquid-network-mainnet/graphql |
 | port | Port number of the worker | 9090 |
 
 ## Metrics
