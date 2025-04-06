@@ -24,13 +24,13 @@ func New() *SQD {
 
 // Chart represents a chart definition
 type Chart struct {
-	ID       string
-	Title    string
-	Units    string
-	Family   string
-	Type     string
+	ID         string
+	Title      string
+	Units      string
+	Family     string
+	Type       string
 	Dimensions []*Dimension
-	Priority int
+	Priority   int
 }
 
 // Dimension represents a chart dimension

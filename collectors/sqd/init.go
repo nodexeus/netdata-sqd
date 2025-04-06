@@ -7,12 +7,12 @@ func (s *SQD) Init() {
 			{
 				Name:          "default",
 				PrometheusURL: "http://localhost:9090/metrics",
-				GraphQLURL:    "http://localhost:8080/graphql",
+				GraphQLURL:    "https://subsquid.squids.live/subsquid-network-mainnet/graphql",
 				Port:          9090,
 			},
 		}
 	}
-	
+
 	// Initialize charts
 	s.initCharts()
 }

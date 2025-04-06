@@ -35,7 +35,7 @@
             "description": "URL of the GraphQL API endpoint.",
             "type": "string",
             "format": "uri",
-            "default": "http://localhost:8080"
+            "default": "https://subsquid.squids.live/subsquid-network-mainnet/graphql"
           },
           "port": {
             "title": "Port",

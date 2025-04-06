@@ -22,7 +22,7 @@ var (
 
 // Configuration represents the collector configuration
 type Configuration struct {
-	UpdateEvery int                 `json:"update_every"`
+	UpdateEvery int                `json:"update_every"`
 	Workers     []sqd.WorkerConfig `json:"workers"`
 }
 
@@ -43,7 +43,7 @@ func main() {
 			{
 				Name:          "default",
 				PrometheusURL: "http://localhost:9090",
-				GraphQLURL:    "http://localhost:8080",
+				GraphQLURL:    "https://subsquid.squids.live/subsquid-network-mainnet/graphql",
 				Port:          9090,
 			},
 		},
@@ -74,7 +74,7 @@ func main() {
 
 	fmt.Printf("Collector initialized with update interval: %d seconds\n", config.UpdateEvery)
 	for _, worker := range config.Workers {
-		fmt.Printf("Monitoring worker: %s (Prometheus: %s, GraphQL: %s)\n", 
+		fmt.Printf("Monitoring worker: %s (Prometheus: %s, GraphQL: %s)\n",
 			worker.Name, worker.PrometheusURL, worker.GraphQLURL)
 	}
 
@@ -93,14 +93,14 @@ func main() {
 		case <-ticker.C:
 			// Collect metrics
 			metrics := collector.Collect()
-			
+
 			// Print metrics in netdata format
 			for key, value := range metrics {
 				fmt.Printf("BEGIN sqd.%s\n", key)
 				fmt.Printf("SET value = %d\n", value)
 				fmt.Printf("END\n")
 			}
-			
+
 		case sig := <-sigCh:
 			fmt.Printf("Received signal: %v, shutting down\n", sig)
 			return

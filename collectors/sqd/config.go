@@ -55,7 +55,7 @@ func (c *Config) Init() {
 			{
 				Name:          "default",
 				PrometheusURL: "http://localhost:9090",
-				GraphQLURL:    "http://localhost:8080",
+				GraphQLURL:    "https://subsquid.squids.live/subsquid-network-mainnet/graphql",
 				Port:          9090,
 			},
 		}

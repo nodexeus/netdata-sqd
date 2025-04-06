@@ -91,7 +91,7 @@ update_every: 1
 workers:
   - name: default
     prometheus_url: http://localhost:9090
-    graphql_url: http://localhost:8080
+    graphql_url: https://subsquid.squids.live/subsquid-network-mainnet/graphql
     port: 9090
 EOF
         sudo cp build/sqd.conf /etc/netdata/go.d/
