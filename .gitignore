@@ -30,7 +30,9 @@ dist/
 .DS_Store
 
 # Project-specific build output
-*.plugin
+# Only ignore plugin files, not directories
+build/*.plugin
+dist/*.plugin
 
 # Netdata configuration files (create on local install)
 *.conf.local
