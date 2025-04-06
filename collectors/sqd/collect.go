@@ -14,8 +14,8 @@ import (
 )
 
 // Collect gathers metrics from SQD workers
-func (s *SQD) Collect() map[string]int64 {
-	metrics := make(map[string]int64)
+func (s *SQD) Collect() map[string]float64 {
+	metrics := make(map[string]float64)
 	
 	for _, worker := range s.Workers {
 		originalWorkerID := s.safeID(worker.Name)
@@ -56,33 +56,33 @@ func (s *SQD) Collect() map[string]int64 {
 		var gqlMetrics *GraphQLMetrics
 		// Map metrics to netdata format
 		if promMetrics != nil {
-			metrics[fmt.Sprintf("worker_%s_active_connections", originalWorkerID)] = int64(promMetrics.ActiveConnections)
-			metrics[fmt.Sprintf("worker_%s_ongoing_probes", originalWorkerID)] = int64(promMetrics.OngoingProbes)
-			metrics[fmt.Sprintf("worker_%s_ongoing_queries", originalWorkerID)] = int64(promMetrics.OngoingQueries)
-			metrics[fmt.Sprintf("worker_%s_heartbeats_published", originalWorkerID)] = int64(promMetrics.HeartbeatsPublished)
-			metrics[fmt.Sprintf("worker_%s_heartbeats_received", originalWorkerID)] = int64(promMetrics.HeartbeatsReceived)
-			metrics[fmt.Sprintf("worker_%s_chunks_available", originalWorkerID)] = int64(promMetrics.ChunksAvailable)
-			metrics[fmt.Sprintf("worker_%s_chunks_downloading", originalWorkerID)] = int64(promMetrics.ChunksDownloading)
-			metrics[fmt.Sprintf("worker_%s_chunks_pending", originalWorkerID)] = int64(promMetrics.ChunksPending)
-			metrics[fmt.Sprintf("worker_%s_chunks_downloaded", originalWorkerID)] = int64(promMetrics.ChunksDownloaded)
-			metrics[fmt.Sprintf("worker_%s_chunks_failed", originalWorkerID)] = int64(promMetrics.ChunksFailed)
-			metrics[fmt.Sprintf("worker_%s_chunks_removed", originalWorkerID)] = int64(promMetrics.ChunksRemoved)
-			metrics[fmt.Sprintf("worker_%s_storage_bytes", originalWorkerID)] = int64(promMetrics.UsedStorageBytes)
-			metrics[fmt.Sprintf("worker_%s_running_queries", originalWorkerID)] = int64(promMetrics.RunningQueries)
+			metrics[fmt.Sprintf("worker_%s_active_connections", originalWorkerID)] = float64(promMetrics.ActiveConnections)
+			metrics[fmt.Sprintf("worker_%s_ongoing_probes", originalWorkerID)] = float64(promMetrics.OngoingProbes)
+			metrics[fmt.Sprintf("worker_%s_ongoing_queries", originalWorkerID)] = float64(promMetrics.OngoingQueries)
+			metrics[fmt.Sprintf("worker_%s_heartbeats_published", originalWorkerID)] = float64(promMetrics.HeartbeatsPublished)
+			metrics[fmt.Sprintf("worker_%s_heartbeats_received", originalWorkerID)] = float64(promMetrics.HeartbeatsReceived)
+			metrics[fmt.Sprintf("worker_%s_chunks_available", originalWorkerID)] = float64(promMetrics.ChunksAvailable)
+			metrics[fmt.Sprintf("worker_%s_chunks_downloading", originalWorkerID)] = float64(promMetrics.ChunksDownloading)
+			metrics[fmt.Sprintf("worker_%s_chunks_pending", originalWorkerID)] = float64(promMetrics.ChunksPending)
+			metrics[fmt.Sprintf("worker_%s_chunks_downloaded", originalWorkerID)] = float64(promMetrics.ChunksDownloaded)
+			metrics[fmt.Sprintf("worker_%s_chunks_failed", originalWorkerID)] = float64(promMetrics.ChunksFailed)
+			metrics[fmt.Sprintf("worker_%s_chunks_removed", originalWorkerID)] = float64(promMetrics.ChunksRemoved)
+			metrics[fmt.Sprintf("worker_%s_storage_bytes", originalWorkerID)] = float64(promMetrics.UsedStorageBytes)
+			metrics[fmt.Sprintf("worker_%s_running_queries", originalWorkerID)] = float64(promMetrics.RunningQueries)
 			
 			// Get the GraphQL metrics from the map if available
 			gqlMetrics = s.graphqlMetrics[originalWorkerID]
 		}
 		
 		if gqlMetrics != nil {
-			metrics[fmt.Sprintf("worker_%s_online", originalWorkerID)] = boolToInt64(gqlMetrics.Online)
-			metrics[fmt.Sprintf("worker_%s_jailed", originalWorkerID)] = boolToInt64(gqlMetrics.Jailed)
-			metrics[fmt.Sprintf("worker_%s_apr", originalWorkerID)] = int64(gqlMetrics.APR * 1000)
-			metrics[fmt.Sprintf("worker_%s_staker_apr", originalWorkerID)] = int64(gqlMetrics.StakerAPR * 1000)
-			metrics[fmt.Sprintf("worker_%s_uptime_24h", originalWorkerID)] = int64(gqlMetrics.Uptime24Hours * 1000)
-			metrics[fmt.Sprintf("worker_%s_uptime_90d", originalWorkerID)] = int64(gqlMetrics.Uptime90Days * 1000)
-			metrics[fmt.Sprintf("worker_%s_traffic_weight", originalWorkerID)] = int64(gqlMetrics.TrafficWeight * 1000)
-			metrics[fmt.Sprintf("worker_%s_delegation_count", originalWorkerID)] = int64(gqlMetrics.DelegationCount)
+			metrics[fmt.Sprintf("worker_%s_online", originalWorkerID)] = float64(boolToInt64(gqlMetrics.Online))
+			metrics[fmt.Sprintf("worker_%s_jailed", originalWorkerID)] = float64(boolToInt64(gqlMetrics.Jailed))
+			metrics[fmt.Sprintf("worker_%s_apr", originalWorkerID)] = gqlMetrics.APR
+			metrics[fmt.Sprintf("worker_%s_staker_apr", originalWorkerID)] = gqlMetrics.StakerAPR
+			metrics[fmt.Sprintf("worker_%s_uptime_24h", originalWorkerID)] = gqlMetrics.Uptime24Hours
+			metrics[fmt.Sprintf("worker_%s_uptime_90d", originalWorkerID)] = gqlMetrics.Uptime90Days
+			metrics[fmt.Sprintf("worker_%s_traffic_weight", originalWorkerID)] = gqlMetrics.TrafficWeight
+			metrics[fmt.Sprintf("worker_%s_delegation_count", originalWorkerID)] = float64(gqlMetrics.DelegationCount)
 		}
 	}
 	

@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -93,10 +94,22 @@ func main() {
 			// Collect metrics
 			metrics := collector.Collect()
 
+			// First, print chart definitions if needed (first run)
+			static := make(map[string]bool)
+
 			// Print metrics in netdata format
 			for key, value := range metrics {
+				// Only print chart definition once
+				if !static[key] {
+					fmt.Printf("CHART sqd.%s '' 'SQD Worker Metric: %s' '%s' 'sqd' 'subsquid' 'line' 1 %d\n", 
+						key, key, determineUnit(key), config.UpdateEvery)
+					fmt.Printf("DIMENSION value '' absolute 1 1\n")
+					static[key] = true
+				}
+
+				// Print the actual data
 				fmt.Printf("BEGIN sqd.%s\n", key)
-				fmt.Printf("SET value = %d\n", value)
+				fmt.Printf("SET value = %f\n", value)
 				fmt.Printf("END\n")
 			}
 
@@ -104,5 +117,30 @@ func main() {
 			fmt.Printf("Received signal: %v, shutting down\n", sig)
 			return
 		}
+	}
+}
+
+// determineUnit returns the appropriate unit for a given metric
+func determineUnit(metricName string) string {
+	if strings.Contains(metricName, "bytes") {
+		return "bytes"
+	} else if strings.Contains(metricName, "apr") {
+		return "percentage"
+	} else if strings.Contains(metricName, "uptime") {
+		return "percentage"
+	} else if strings.Contains(metricName, "traffic_weight") {
+		return "percentage"
+	} else if strings.Contains(metricName, "online") || strings.Contains(metricName, "jailed") {
+		return "boolean"
+	} else if strings.Contains(metricName, "count") {
+		return "count"
+	} else if strings.Contains(metricName, "connections") {
+		return "connections"
+	} else if strings.Contains(metricName, "queries") {
+		return "queries"
+	} else if strings.Contains(metricName, "chunks") {
+		return "chunks"
+	} else {
+		return "value"
 	}
 }
