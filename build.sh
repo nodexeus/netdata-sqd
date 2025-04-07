@@ -82,6 +82,9 @@ if [ $? -eq 0 ]; then
         # Make it executable
         sudo chmod 755 "$NETDATA_PLUGIN_DIR/sqd.plugin"
         
+        # Set ownership to netdata user
+        sudo chown netdata:netdata "$NETDATA_PLUGIN_DIR/sqd.plugin"
+        
         # Copy default configuration
         echo "Creating default configuration..."
         cat > build/sqd.conf << EOF
@@ -94,6 +97,7 @@ workers:
     graphql_url: https://subsquid.squids.live/subsquid-network-mainnet/graphql
 EOF
         sudo cp build/sqd.conf /etc/netdata/go.d/
+        sudo chown netdata:netdata /etc/netdata/go.d/sqd.conf
         
         echo "Installation complete! Restart netdata to activate the plugin:"
         echo "sudo systemctl restart netdata"

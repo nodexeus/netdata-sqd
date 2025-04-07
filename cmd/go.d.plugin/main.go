@@ -28,11 +28,32 @@ type Configuration struct {
 }
 
 func main() {
+	// Check if we're being called by netdata for discovery
+	if len(os.Args) > 1 && os.Args[1] == "discover" {
+		// Output plugin metadata for netdata
+		fmt.Println("PLUGIN_VERSION=1.0.0")
+		fmt.Println("PLUGIN_TYPE=collector")
+		fmt.Println("PLUGIN_CAPABILITIES=charts")
+		return
+	}
+
+	// Check if we're being called by netdata for configuration
+	if len(os.Args) > 1 && os.Args[1] == "config" {
+		// Output default configuration
+		fmt.Println("update_every: 60")
+		fmt.Println("workers:")
+		fmt.Println("  - name: default")
+		fmt.Println("    prometheus_url: http://localhost:9090")
+		fmt.Println("    graphql_url: https://subsquid.squids.live/subsquid-network-mainnet/graphql")
+		return
+	}
+
 	fmt.Printf("SQD Collector %s (commit: %s)\n", version, commit)
 
 	// Try to find config file
 	configPaths := []string{
 		"./sqd.conf",
+		"/etc/netdata/go.d/sqd.conf", // Updated path to match installation
 		"/etc/netdata/sqd.conf",
 		filepath.Join(os.Getenv("HOME"), ".config/netdata/sqd.conf"),
 	}
@@ -101,7 +122,7 @@ func main() {
 			for key, value := range metrics {
 				// Only print chart definition once
 				if !static[key] {
-					fmt.Printf("CHART sqd.%s '' 'SQD Worker Metric: %s' '%s' 'sqd' 'subsquid' 'line' 1 %d\n", 
+					fmt.Printf("CHART sqd.%s '' 'SQD Worker Metric: %s' '%s' 'sqd' 'subsquid' 'line' 1 %d\n",
 						key, key, determineUnit(key), config.UpdateEvery)
 					fmt.Printf("DIMENSION value '' absolute 1 1\n")
 					static[key] = true
@@ -109,7 +130,7 @@ func main() {
 
 				// Print the actual data
 				fmt.Printf("BEGIN sqd.%s\n", key)
-				
+
 				// Use appropriate precision for different types of metrics
 				if strings.Contains(key, "apr") || strings.Contains(key, "uptime") || strings.Contains(key, "traffic_weight") {
 					// Use more precision for percentage values
@@ -118,7 +139,7 @@ func main() {
 					// Use regular precision for other values
 					fmt.Printf("SET value = %f\n", value)
 				}
-				
+
 				fmt.Printf("END\n")
 			}
 
